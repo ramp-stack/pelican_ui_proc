@@ -8,7 +8,6 @@ documentation = "https://docs.rs/rust_on_rails_proc"
 repository = "https://github.com/ramp-stack/rust_on_rails_proc"
 readme = "README.md"
 keywords = ["proc-macro", "ui", "rust", "abstraction"]
-categories = ["development-tools::procedural-macro"]
 
 [lib]
 proc-macro = true

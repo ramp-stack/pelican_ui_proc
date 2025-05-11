@@ -1,0 +1,1 @@
+/Users/ellamae/rust_on_rails_proc/target/package/rust_on_rails_proc-1.0.0/target/debug/librust_on_rails_proc.dylib: /Users/ellamae/rust_on_rails_proc/target/package/rust_on_rails_proc-1.0.0/src/lib.rs

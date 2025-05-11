@@ -1,0 +1,19 @@
+[package]
+name = "rust_on_rails_proc"
+version = "1.0.0"
+edition = "2021"
+license = "BSD-3-Clause"
+description = "Procedural macros for the Rust On Rails UI abstraction layer."
+documentation = "https://docs.rs/rust_on_rails_proc"
+repository = "https://github.com/ramp-stack/rust_on_rails_proc"
+readme = "README.md"
+keywords = ["proc-macro", "ui", "rust", "abstraction"]
+categories = ["development-tools::procedural-macro"]
+
+[lib]
+proc-macro = true
+
+[dependencies]
+proc-macro2 = "1.0.94"
+quote = "1.0.40"
+syn = "2.0.100"
