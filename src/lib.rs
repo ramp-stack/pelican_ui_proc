@@ -6,6 +6,7 @@ enum ChildType {
     Vector(TokenTree),
     Child(TokenTree),
     Opt(TokenTree),
+    OptBox(TokenTree),
     Boxed(TokenTree),
     VecBox(TokenTree),
 }
@@ -14,7 +15,14 @@ impl ChildType {
     fn from_field(ty: &Type, ident: TokenTree) -> Self {
         match ty {
             Type::Path(TypePath{path: Path{segments, ..}, ..}) if segments.first().filter(|s| s.ident.to_string() == "Option".to_string()).is_some() => {
-                ChildType::Opt(ident)
+                let optbox = if let syn::PathArguments::AngleBracketed(args) = &segments.first().unwrap().arguments {
+                    if let syn::GenericArgument::Type(ty) = args.args.first().unwrap() {
+                        if let Type::Path(TypePath{path: Path{segments, ..}, ..}) = ty {
+                            segments.first().filter(|s| s.ident.to_string() == "Box".to_string()).is_some()
+                        } else {false}
+                    } else {false}
+                } else {false};
+                if optbox {ChildType::OptBox(ident)} else {ChildType::Opt(ident)}
             },
             Type::Path(TypePath{path: Path{segments, ..}, ..}) if segments.first().filter(|s| s.ident.to_string() == "Vec".to_string()).is_some() => {
                 let vecbox = if let syn::PathArguments::AngleBracketed(args) = &segments.first().unwrap().arguments {
@@ -72,6 +80,7 @@ pub fn derive_component(input: proc_macro::TokenStream) -> proc_macro::TokenStre
                 ChildType::Vector(name) => quote!{children.extend(self.#name.iter_mut().map(|c| c as &mut dyn Drawable));},
                 ChildType::Child(name) => quote!{children.push(&mut self.#name as &mut dyn Drawable);},
                 ChildType::Opt(name) => quote!{if let Some(item) = self.#name.as_mut() {children.push(item as &mut dyn Drawable);}},
+                ChildType::OptBox(name) => quote!{if let Some(item) = self.#name.as_mut() {children.push(&mut **item as &mut dyn Drawable);}},
                 ChildType::Boxed(name) => quote!{children.push(&mut *self.#name as &mut dyn Drawable);},
                 ChildType::VecBox(name) => quote!{children.extend(self.#name.iter_mut().map(|c| &mut **c as &mut dyn Drawable));}
             }));
@@ -79,6 +88,7 @@ pub fn derive_component(input: proc_macro::TokenStream) -> proc_macro::TokenStre
                 ChildType::Vector(name) => quote!{children.extend(self.#name.iter().map(|c| c as &dyn Drawable));},
                 ChildType::Child(name) => quote!{children.push(&self.#name as &dyn Drawable);},
                 ChildType::Opt(name) => quote!{if let Some(item) = self.#name.as_ref() {children.push(item as &dyn Drawable);}},
+                ChildType::OptBox(name) => quote!{if let Some(item) = self.#name.as_ref() {children.push(&**item as &dyn Drawable);}},
                 ChildType::Boxed(name) => quote!{children.push(&*self.#name as &dyn Drawable);},
                 ChildType::VecBox(name) => quote!{children.extend(self.#name.iter().map(|c| &**c as &dyn Drawable));}
             }));
