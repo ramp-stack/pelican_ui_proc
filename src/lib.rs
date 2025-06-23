@@ -5,6 +5,7 @@ use quote::quote;
 enum ChildType {
     Vector(TokenTree),
     Child(TokenTree),
+    HashMap(TokenTree),
     Opt(TokenTree),
     OptBox(TokenTree),
     Boxed(TokenTree),
@@ -33,6 +34,9 @@ impl ChildType {
                     } else {false}
                 } else {false};
                 if vecbox {ChildType::VecBox(ident)} else {ChildType::Vector(ident)}
+            },
+            Type::Path(TypePath{path: Path{segments, ..}, ..}) if segments.first().filter(|s| s.ident.to_string() == "HashMap").is_some() => {
+                ChildType::HashMap(ident)
             },
             Type::Path(TypePath{path: Path{segments, ..}, ..}) if segments.first().filter(|s| s.ident.to_string() == "Box".to_string()).is_some() => {
                 ChildType::Boxed(ident)
@@ -78,6 +82,7 @@ pub fn derive_component(input: proc_macro::TokenStream) -> proc_macro::TokenStre
 
             let children_mut = TokenStream::from_iter(children.iter().map(|child| match child {
                 ChildType::Vector(name) => quote!{children.extend(self.#name.iter_mut().map(|c| c as &mut dyn Drawable));},
+                ChildType::HashMap(name) => quote!{children.extend(self.#name.values_mut().map(|v| v as &mut dyn Drawable));},
                 ChildType::Child(name) => quote!{children.push(&mut self.#name as &mut dyn Drawable);},
                 ChildType::Opt(name) => quote!{if let Some(item) = self.#name.as_mut() {children.push(item as &mut dyn Drawable);}},
                 ChildType::OptBox(name) => quote!{if let Some(item) = self.#name.as_mut() {children.push(&mut **item as &mut dyn Drawable);}},
@@ -86,6 +91,7 @@ pub fn derive_component(input: proc_macro::TokenStream) -> proc_macro::TokenStre
             }));
             let children = TokenStream::from_iter(children.iter().map(|child| match child {
                 ChildType::Vector(name) => quote!{children.extend(self.#name.iter().map(|c| c as &dyn Drawable));},
+                ChildType::HashMap(name) => quote!{children.extend(self.#name.values().map(|v| v as &dyn Drawable));},
                 ChildType::Child(name) => quote!{children.push(&self.#name as &dyn Drawable);},
                 ChildType::Opt(name) => quote!{if let Some(item) = self.#name.as_ref() {children.push(item as &dyn Drawable);}},
                 ChildType::OptBox(name) => quote!{if let Some(item) = self.#name.as_ref() {children.push(&**item as &dyn Drawable);}},
