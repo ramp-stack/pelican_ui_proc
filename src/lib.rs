@@ -35,7 +35,7 @@ impl ChildType {
                 } else {false};
                 if vecbox {ChildType::VecBox(ident)} else {ChildType::Vector(ident)}
             },
-            Type::Path(TypePath{path: Path{segments, ..}, ..}) if segments.first().filter(|s| s.ident.to_string() == "HashMap").is_some() => {
+            Type::Path(TypePath{path: Path{segments, ..}, ..}) if segments.first().filter(|s| s.ident.to_string() == "HashMap" || s.ident.to_string() == "IndexMap").is_some() => {
                 ChildType::HashMap(ident)
             },
             Type::Path(TypePath{path: Path{segments, ..}, ..}) if segments.first().filter(|s| s.ident.to_string() == "Box".to_string()).is_some() => {
