@@ -81,42 +81,42 @@ pub fn derive_component(input: proc_macro::TokenStream) -> proc_macro::TokenStre
             children.is_empty().then(|| {panic!("Component requires at least one child component in the structure");});
 
             let children_mut = TokenStream::from_iter(children.iter().map(|child| match child {
-                ChildType::Vector(name) => quote!{children.extend(self.#name.iter_mut().map(|c| c as &mut dyn roost::drawable::Drawable));},
-                ChildType::HashMap(name) => quote!{children.extend(self.#name.values_mut().map(|v| v as &mut dyn roost::drawable::Drawable));},
-                ChildType::Child(name) => quote!{children.push(&mut self.#name as &mut dyn roost::drawable::Drawable);},
-                ChildType::Opt(name) => quote!{if let Some(item) = self.#name.as_mut() {children.push(item as &mut dyn roost::drawable::Drawable);}},
-                ChildType::OptBox(name) => quote!{if let Some(item) = self.#name.as_mut() {children.push(&mut **item as &mut dyn roost::drawable::Drawable);}},
-                ChildType::Boxed(name) => quote!{children.push(&mut *self.#name as &mut dyn roost::drawable::Drawable);},
-                ChildType::VecBox(name) => quote!{children.extend(self.#name.iter_mut().map(|c| &mut **c as &mut dyn roost::drawable::Drawable));}
+                ChildType::Vector(name) => quote!{children.extend(self.#name.iter_mut().map(|c| c as &mut dyn pelican_ui::drawable::Drawable));},
+                ChildType::HashMap(name) => quote!{children.extend(self.#name.values_mut().map(|v| v as &mut dyn pelican_ui::drawable::Drawable));},
+                ChildType::Child(name) => quote!{children.push(&mut self.#name as &mut dyn pelican_ui::drawable::Drawable);},
+                ChildType::Opt(name) => quote!{if let Some(item) = self.#name.as_mut() {children.push(item as &mut dyn pelican_ui::drawable::Drawable);}},
+                ChildType::OptBox(name) => quote!{if let Some(item) = self.#name.as_mut() {children.push(&mut **item as &mut dyn pelican_ui::drawable::Drawable);}},
+                ChildType::Boxed(name) => quote!{children.push(&mut *self.#name as &mut dyn pelican_ui::drawable::Drawable);},
+                ChildType::VecBox(name) => quote!{children.extend(self.#name.iter_mut().map(|c| &mut **c as &mut dyn pelican_ui::drawable::Drawable));}
             }));
             let children = TokenStream::from_iter(children.iter().map(|child| match child {
-                ChildType::Vector(name) => quote!{children.extend(self.#name.iter().map(|c| c as &dyn roost::drawable::Drawable));},
-                ChildType::HashMap(name) => quote!{children.extend(self.#name.values().map(|v| v as &dyn roost::drawable::Drawable));},
-                ChildType::Child(name) => quote!{children.push(&self.#name as &dyn roost::drawable::Drawable);},
-                ChildType::Opt(name) => quote!{if let Some(item) = self.#name.as_ref() {children.push(item as &dyn roost::drawable::Drawable);}},
-                ChildType::OptBox(name) => quote!{if let Some(item) = self.#name.as_ref() {children.push(&**item as &dyn roost::drawable::Drawable);}},
-                ChildType::Boxed(name) => quote!{children.push(&*self.#name as &dyn roost::drawable::Drawable);},
-                ChildType::VecBox(name) => quote!{children.extend(self.#name.iter().map(|c| &**c as &dyn roost::drawable::Drawable));}
+                ChildType::Vector(name) => quote!{children.extend(self.#name.iter().map(|c| c as &dyn pelican_ui::drawable::Drawable));},
+                ChildType::HashMap(name) => quote!{children.extend(self.#name.values().map(|v| v as &dyn pelican_ui::drawable::Drawable));},
+                ChildType::Child(name) => quote!{children.push(&self.#name as &dyn pelican_ui::drawable::Drawable);},
+                ChildType::Opt(name) => quote!{if let Some(item) = self.#name.as_ref() {children.push(item as &dyn pelican_ui::drawable::Drawable);}},
+                ChildType::OptBox(name) => quote!{if let Some(item) = self.#name.as_ref() {children.push(&**item as &dyn pelican_ui::drawable::Drawable);}},
+                ChildType::Boxed(name) => quote!{children.push(&*self.#name as &dyn pelican_ui::drawable::Drawable);},
+                ChildType::VecBox(name) => quote!{children.extend(self.#name.iter().map(|c| &**c as &dyn pelican_ui::drawable::Drawable));}
             }));
 
             proc_macro::TokenStream::from(quote!{
                 impl #impl_generics Component for #name #ty_generics #where_clause {
-                    fn children_mut(&mut self) -> Vec<&mut dyn roost::drawable::Drawable> {
+                    fn children_mut(&mut self) -> Vec<&mut dyn pelican_ui::drawable::Drawable> {
                         let mut children = vec![];
                         #children_mut
                         children
                     }
-                    fn children(&self) -> Vec<&dyn roost::drawable::Drawable> {
+                    fn children(&self) -> Vec<&dyn pelican_ui::drawable::Drawable> {
                         let mut children = vec![];
                         #children
                         children
                     }
 
-                    fn request_size(&self, ctx: &mut Context, children: Vec<roost::layout::SizeRequest>) -> roost::layout::SizeRequest {
-                        roost::layout::Layout::request_size(&self.#layout, ctx, children)
+                    fn request_size(&self, ctx: &mut Context, children: Vec<pelican_ui::layout::SizeRequest>) -> pelican_ui::layout::SizeRequest {
+                        pelican_ui::layout::Layout::request_size(&self.#layout, ctx, children)
                     }
-                    fn build(&mut self, ctx: &mut Context, size: (f32, f32), children: Vec<roost::layout::SizeRequest>) -> Vec<roost::layout::Area> {
-                        roost::layout::Layout::build(&mut self.#layout, ctx, size, children)
+                    fn build(&mut self, ctx: &mut Context, size: (f32, f32), children: Vec<pelican_ui::layout::SizeRequest>) -> Vec<pelican_ui::layout::Area> {
+                        pelican_ui::layout::Layout::build(&mut self.#layout, ctx, size, children)
                     }
                 }
             })
@@ -146,26 +146,26 @@ pub fn derive_component(input: proc_macro::TokenStream) -> proc_macro::TokenStre
                     Fields::Unit => None,
                 }.unwrap_or_else(|| {panic!("Enumerator Component requires the first field of each variant to be a Component");})
             }).collect::<Vec<_>>();
-            let children_mut = TokenStream::from_iter(starts.iter().map(|(b, s)| if !b {quote!{#s vec![c as &mut dyn roost::drawable::Drawable],}} else {quote!{#s vec![&mut **c as &mut dyn roost::drawable::Drawable],}}));
-            let children = TokenStream::from_iter(starts.iter().map(|(b, s)| if !b {quote!{#s vec![c as &dyn roost::drawable::Drawable],}} else {quote!{#s vec![&**c as &dyn roost::drawable::Drawable],}}));
+            let children_mut = TokenStream::from_iter(starts.iter().map(|(b, s)| if !b {quote!{#s vec![c as &mut dyn pelican_ui::drawable::Drawable],}} else {quote!{#s vec![&mut **c as &mut dyn pelican_ui::drawable::Drawable],}}));
+            let children = TokenStream::from_iter(starts.iter().map(|(b, s)| if !b {quote!{#s vec![c as &dyn pelican_ui::drawable::Drawable],}} else {quote!{#s vec![&**c as &dyn pelican_ui::drawable::Drawable],}}));
             proc_macro::TokenStream::from(quote!{
                 impl #impl_generics Component for #name #ty_generics #where_clause {
-                    fn children_mut(&mut self) -> Vec<&mut dyn roost::drawable::Drawable> {
+                    fn children_mut(&mut self) -> Vec<&mut dyn pelican_ui::drawable::Drawable> {
                         match self {
                             #children_mut
                         }
                     }
-                    fn children(&self) -> Vec<&dyn roost::drawable::Drawable> {
+                    fn children(&self) -> Vec<&dyn pelican_ui::drawable::Drawable> {
                         match self {
                             #children
                         }
                     }
 
-                    fn request_size(&self, ctx: &mut Context, mut children: Vec<roost::layout::SizeRequest>) -> roost::layout::SizeRequest {
+                    fn request_size(&self, ctx: &mut Context, mut children: Vec<pelican_ui::layout::SizeRequest>) -> pelican_ui::layout::SizeRequest {
                         children.remove(0)
                     }
-                    fn build(&mut self, ctx: &mut Context, size: (f32, f32), children: Vec<roost::layout::SizeRequest>) -> Vec<roost::layout::Area> {
-                        vec![roost::layout::Area{offset: (0, 0), size}]
+                    fn build(&mut self, ctx: &mut Context, size: (f32, f32), children: Vec<pelican_ui::layout::SizeRequest>) -> Vec<pelican_ui::layout::Area> {
+                        vec![pelican_ui::layout::Area{offset: (0, 0), size}]
                     }
                 }
             })
