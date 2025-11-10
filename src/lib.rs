@@ -165,7 +165,7 @@ pub fn derive_component(input: proc_macro::TokenStream) -> proc_macro::TokenStre
                         children.remove(0)
                     }
                     fn build(&mut self, ctx: &mut Context, size: (f32, f32), children: Vec<pelican_ui::layout::SizeRequest>) -> Vec<pelican_ui::layout::Area> {
-                        vec![pelican_ui::layout::Area{offset: (0, 0), size}]
+                        vec![pelican_ui::layout::Area{offset: (0.0, 0.0), size}]
                     }
                 }
             })
